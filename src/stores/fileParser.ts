@@ -5,8 +5,9 @@ import mammoth from 'mammoth'
 import anyDateParser from 'any-date-parser'
 
 export interface RawTextObject {
-  fileName: string
-  value: string
+  file: File
+  rawText: string
+  dates: DateObject[]
 }
 
 export interface DateObject {
@@ -56,6 +57,7 @@ export const useFileParserStore = defineStore('fileParser', () => {
   const files: Ref<File[]> = ref([])
   const rawTextFiles: Ref<RawTextObject[]> = ref([])
   const parsedDates: Ref<ParsedDatesObject[]> = ref([])
+  const calendarFormattedData: Ref<any> = ref([])
 
   const addFile = (file: File) => {
     // Add file to files array for reference
@@ -76,7 +78,11 @@ export const useFileParserStore = defineStore('fileParser', () => {
         // Add extracted string to rawTextFiles array
         rawTextFiles.value = [
           ...rawTextFiles.value,
-          { fileName: file.name, value: resultObject.value }
+          {
+            file: file,
+            rawText: resultObject.value,
+            dates: parseDatesFromString(resultObject.value)
+          }
         ]
       })
     }
@@ -85,17 +91,44 @@ export const useFileParserStore = defineStore('fileParser', () => {
 
   const parseDates = () => {
     rawTextFiles.value.forEach((rawTextFile: RawTextObject) => {
-      console.log(parseDatesFromString(rawTextFile.value))
-
       parsedDates.value = [
         ...parsedDates.value,
         {
-          fileName: rawTextFile.fileName,
-          dates: parseDatesFromString(rawTextFile.value)
+          fileName: rawTextFile.file.name,
+          dates: parseDatesFromString(rawTextFile.rawText)
         }
       ]
     })
   }
 
-  return { files, rawTextFiles, addFile, parseDates, parsedDates }
+  const getCalendarData = () => {
+    parsedDates.value.forEach((parsedDatesObject: ParsedDatesObject) => {
+      parsedDatesObject.dates.forEach((dateObject: DateObject) => {
+        calendarFormattedData.value = [
+          ...calendarFormattedData.value,
+          {
+            key: 'key',
+            content: 'red', // Boolean, String, Object
+            bar: true, // Boolean, String, Object
+            dates: dateObject.parsedDate,
+            customData: {
+              title: dateObject.originalString,
+              description: 'This is a description'
+            },
+            popover: true
+          }
+        ]
+      })
+    })
+  }
+
+  return {
+    files,
+    rawTextFiles,
+    addFile,
+    parseDates,
+    parsedDates,
+    calendarFormattedData,
+    getCalendarData
+  }
 })
