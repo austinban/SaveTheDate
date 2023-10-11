@@ -19,6 +19,7 @@ const showFilePreview = ref(false)
     </div>
     <div class="list">
       <FileListItem v-for="dateObject in fileObject.dates" :dateObject="dateObject" />
+      <div v-if="fileObject.dates.length === 0">No dates found in this document</div>
     </div>
   </div>
   <div class="" v-if="showFilePreview"></div>

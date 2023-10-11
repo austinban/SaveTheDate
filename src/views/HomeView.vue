@@ -25,7 +25,7 @@ const toggleShowUpload = () => {
       hidden: fileParser.processedFileObjects.length === 0
     }"
   />
-  <BubbleWrapper v-if="!fileParser.processedFileObjects.length | showUpload">
+  <BubbleWrapper v-if="!fileParser.getDates().length | showUpload">
     <FileUploader />
   </BubbleWrapper>
   <div class="grid-wrapper">
@@ -34,7 +34,7 @@ const toggleShowUpload = () => {
         <FileList />
       </BubbleWrapper>
     </div>
-    <div>
+    <div v-if="fileParser.getDates().length > 0">
       <BubbleWrapper v-if="fileParser.processedFileObjects.length">
         <CalendarComp />
       </BubbleWrapper>
