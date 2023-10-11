@@ -4,24 +4,24 @@ import { defineStore } from 'pinia'
 import mammoth from 'mammoth'
 import anyDateParser from 'any-date-parser'
 
-interface RawTextObject {
+export interface ProcessedFile {
   file: File
   rawText: string
   dates: DateObject[]
 }
 
-interface DateObject {
+export interface DateObject {
   originalString: string
   parsedDate: Date
   contextString: string
 }
 
-interface ParsedDatesObject {
+export interface ParsedDatesObject {
   fileName: string
   dates: DateObject[]
 }
 
-interface CalendarObject {
+export interface CalendarObject {
   key: string
   content: string
   dates: Date
@@ -29,7 +29,13 @@ interface CalendarObject {
     date: DateObject
     file: File
   }
-  popover: boolean
+  popover: {
+    visibility: string
+  }
+  highlight: {
+    color: string
+    fillMode: string
+  }
   order: number
 }
 
@@ -55,7 +61,7 @@ const parseDatesFromString = (rawText: string): DateObject[] => {
         const parsedDate = anyDateParser.attempt(cleanDateString(match))
         const newDateObject = new Date(parsedDate.year, parsedDate.month, parsedDate.day)
         const index = rawText.indexOf(match)
-        const contextString = rawText.substring(index - 20, index + match.length + 20)
+        const contextString = rawText.substring(index - 40, index + match.length + 40)
         parsedDates.push({
           originalString: match,
           parsedDate: newDateObject,
@@ -70,7 +76,7 @@ const parseDatesFromString = (rawText: string): DateObject[] => {
 
 export const useFileParserStore = defineStore('fileParser', () => {
   const files: Ref<File[]> = ref([])
-  const rawTextFiles: Ref<RawTextObject[]> = ref([])
+  const processedFileObjects: Ref<ProcessedFile[]> = ref([])
   const parsedDates: Ref<ParsedDatesObject[]> = ref([])
 
   const addFile = (file: File) => {
@@ -89,9 +95,9 @@ export const useFileParserStore = defineStore('fileParser', () => {
       const arrayBuffer = reader.result as ArrayBuffer
 
       mammoth.extractRawText({ arrayBuffer: arrayBuffer }).then(function (resultObject) {
-        // Add extracted string to rawTextFiles array
-        rawTextFiles.value = [
-          ...rawTextFiles.value,
+        // Add extracted string to processedFileObjects array
+        processedFileObjects.value = [
+          ...processedFileObjects.value,
           {
             file: file,
             rawText: resultObject.value,
@@ -103,32 +109,10 @@ export const useFileParserStore = defineStore('fileParser', () => {
     reader.readAsArrayBuffer(file)
   }
 
-  const getDates = () => {
-    const dates: CalendarObject[] = []
-    rawTextFiles.value.forEach((file) => {
-      file.dates.forEach((date) => {
-        dates.push({
-          key: date.originalString,
-          content: 'red',
-          dates: date.parsedDate,
-          customData: {
-            date: date,
-            file: file.file
-          },
-          popover: true,
-          order: 0
-        })
-      })
-    })
-
-    return dates.sort((a, b) => b.dates.getTime() - a.dates.getTime())
-  }
-
   return {
     files,
-    rawTextFiles,
+    processedFileObjects,
     addFile,
-    parsedDates,
-    getDates
+    parsedDates
   }
 })

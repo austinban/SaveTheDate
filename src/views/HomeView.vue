@@ -21,21 +21,21 @@ const toggleShowUpload = () => {
     subtitle="To get started, drag or select your DOCX file, and we'll do all the hard work for you to save the dates from your files."
     :buttonProps="{
       onClick: toggleShowUpload,
-      label: showUpload ? 'Hide Uploader' : 'Upload Files',
-      hidden: fileParser.rawTextFiles.length === 0
+      label: showUpload ? 'Hide Uploader' : 'Add Files',
+      hidden: fileParser.processedFileObjects.length === 0
     }"
   />
-  <BubbleWrapper v-if="!fileParser.rawTextFiles.length | showUpload">
+  <BubbleWrapper v-if="!fileParser.processedFileObjects.length | showUpload">
     <FileUploader />
   </BubbleWrapper>
   <div class="grid-wrapper">
     <div>
-      <BubbleWrapper v-if="fileParser.rawTextFiles.length">
+      <BubbleWrapper v-if="fileParser.processedFileObjects.length">
         <FileList />
       </BubbleWrapper>
     </div>
     <div>
-      <BubbleWrapper v-if="fileParser.rawTextFiles.length">
+      <BubbleWrapper v-if="fileParser.processedFileObjects.length">
         <CalendarComp />
       </BubbleWrapper>
     </div>
@@ -45,7 +45,7 @@ const toggleShowUpload = () => {
 <style scoped>
 .grid-wrapper {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1.2fr 2fr;
   grid-gap: 2em;
 
   @media (max-width: 992px) {

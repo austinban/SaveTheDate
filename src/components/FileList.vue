@@ -1,34 +1,27 @@
-<script setup lang="ts">
+<script setup>
+import { ref } from 'vue'
 import DownloadFileLink from '@/components/DownloadFileLink.vue'
 import { useFileParserStore } from '@/stores/fileParser'
+import FileListItem from '@/components/FileListItem.vue'
 const fileParser = useFileParserStore()
+const showFilePreview = ref(false)
 </script>
 
 <template>
-  <div class="wrapper" v-for="f in fileParser.rawTextFiles" :key="f.file.name">
+  <div
+    class="wrapper"
+    v-for="fileObject in fileParser.processedFileObjects"
+    :key="fileObject.file.name"
+  >
     <div class="header">
-      <h2>{{ f.file.name }}</h2>
-      <DownloadFileLink :file="f.file" />
+      <h2>{{ fileObject.file.name }}</h2>
+      <DownloadFileLink :file="fileObject.file" />
     </div>
     <div class="list">
-      <div class="item" v-for="date in f.dates" :key="date.originalString">
-        <h4>{{ date.parsedDate.toDateString() }}</h4>
-
-        <div class="context-wrapper">
-          <div class="context-title">Context:</div>
-          <div
-            class="context"
-            v-html="
-              `...${date.contextString.replace(
-                date.originalString,
-                '<b>' + date.originalString + '</b>'
-              )}...`
-            "
-          />
-        </div>
-      </div>
+      <FileListItem v-for="dateObject in fileObject.dates" :dateObject="dateObject" />
     </div>
   </div>
+  <div class="" v-if="showFilePreview"></div>
 </template>
 
 <style scoped>
@@ -52,30 +45,14 @@ const fileParser = useFileParserStore()
 
 .item {
   border-bottom: 1px solid var(--color-secondary);
-  padding: 0.5em 0;
+  padding: 1em 0;
   &:last-child {
     border-bottom: none;
   }
 }
 
 .context {
-  font-size: 0.8em;
-}
-
-.context-title {
-  font-size: 0.8em;
-}
-
-.context-wrapper {
   margin-top: 0.5em;
-  display: flex;
-}
-
-.link {
-  color: var(--color-secondary);
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
+  font-size: 0.8em;
 }
 </style>
