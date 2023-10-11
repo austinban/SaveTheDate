@@ -5,18 +5,33 @@ defineProps<{
   buttonProps?: {
     onClick: () => void
     label: string
+    hidden?: boolean
   }
 }>()
 </script>
 
 <template>
-  <h1>{{ title }}</h1>
+  <div class="header-wrapper">
+    <h1>{{ title }}</h1>
+    <button v-if="buttonProps && !buttonProps.hidden" @click="buttonProps.onClick">
+      {{ buttonProps.label }}
+    </button>
+  </div>
   <p>{{ subtitle }}</p>
-  <button v-if="buttonProps" @click="buttonProps.onClick">{{ buttonProps.label }}</button>
 </template>
 
 <style scoped>
-h1 {
-  margin-bottom: 0;
+.header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1em;
+  @media (max-width: 992px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+p {
+  margin-bottom: 2em;
 }
 </style>

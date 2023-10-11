@@ -1,10 +1,17 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import AppHeader from '@/components/AppHeader.vue'
 </script>
 
 <template>
-  <RouterView />
+  <div class="body-wrapper">
+    <RouterView />
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.body-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2em 4em;
+}
+</style>

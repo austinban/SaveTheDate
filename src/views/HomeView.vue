@@ -19,16 +19,37 @@ const toggleShowUpload = () => {
   <AppHeader
     title="Save the Date"
     subtitle="To get started, drag or select your DOCX file, and we'll do all the hard work for you to save the dates from your files."
-    buttonProps="{onClick: toggleShowUpload, label: 'Add More Files'}"
+    :buttonProps="{
+      onClick: toggleShowUpload,
+      label: showUpload ? 'Hide Uploader' : 'Upload Files',
+      hidden: fileParser.rawTextFiles.length === 0
+    }"
   />
-  <button @click="toggleShowUpload">Add More Files</button>
   <BubbleWrapper v-if="!fileParser.rawTextFiles.length | showUpload">
     <FileUploader />
   </BubbleWrapper>
-  <BubbleWrapper v-if="fileParser.rawTextFiles.length">
-    <FileList />
-  </BubbleWrapper>
-  <BubbleWrapper v-if="fileParser.rawTextFiles.length">
-    <CalendarComp />
-  </BubbleWrapper>
+  <div class="grid-wrapper">
+    <div>
+      <BubbleWrapper v-if="fileParser.rawTextFiles.length">
+        <FileList />
+      </BubbleWrapper>
+    </div>
+    <div>
+      <BubbleWrapper v-if="fileParser.rawTextFiles.length">
+        <CalendarComp />
+      </BubbleWrapper>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.grid-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-gap: 2em;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

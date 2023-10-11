@@ -3,43 +3,44 @@ import { Calendar } from 'v-calendar'
 import { useFileParserStore } from '@/stores/fileParser'
 const fileParser = useFileParserStore()
 import 'v-calendar/style.css'
-
-// data: () => ({
-//   fileParser,
-//   attributes: [
-//     {
-//       key: 'key',
-//       content: 'red', // Boolean, String, Object
-//       bar: true, // Boolean, String, Object
-//       dates: new Date(),
-//       customData: {
-//         title: 'This is a title',
-//         description: 'This is a description'
-//       },
-//       popover: true,
-//       order: 0
-//     }
-//   ]
-// }),
+import DownloadFileLink from '@/components/DownloadFileLink.vue'
 </script>
 
 <template>
-  <button @click="fileParser.getCalendarData()">CalendarData</button>
-  <Calendar :attributes="fileParser.calendarFormattedData">
+  <Calendar :attributes="fileParser.getDates()" expanded>
     <template #day-popover="{ attributes }">
-      <div class="px-2">
+      <div class="wrapper">
         <div v-for="{ key, customData } in attributes" :key="key">
-          <h1>
-            {{ customData.title }}
-          </h1>
-          <p>
-            {{ customData.description }}
-          </p>
-          <a>Link to download</a>
+          {{ console.log(customData) }}
+          <div class="header">
+            <h2>
+              {{ customData.file.name }}
+            </h2>
+            <DownloadFileLink :file="customData.file" />
+          </div>
+          <div
+            class="context"
+            v-html="
+              `...${customData.date.contextString.replace(
+                customData.date.originalString,
+                '<b>' + customData.date.originalString + '</b>'
+              )}...`
+            "
+          />
         </div>
       </div>
     </template>
   </Calendar>
 </template>
 
-<style scoped></style>
+<style scoped>
+.wrapper {
+  padding: 1em;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5em;
+}
+</style>

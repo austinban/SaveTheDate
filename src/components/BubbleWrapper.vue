@@ -22,7 +22,7 @@
   padding: 2em;
   margin-bottom: 2em;
   animation: fadeIn 1s;
-
+  filter: drop-shadow(0 0.2rem 0.25rem rgba(0, 0, 0, 0.05));
   &:last-child {
     margin-bottom: 0;
   }

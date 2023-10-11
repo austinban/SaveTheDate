@@ -4,20 +4,33 @@ import { defineStore } from 'pinia'
 import mammoth from 'mammoth'
 import anyDateParser from 'any-date-parser'
 
-export interface RawTextObject {
+interface RawTextObject {
   file: File
   rawText: string
   dates: DateObject[]
 }
 
-export interface DateObject {
+interface DateObject {
   originalString: string
   parsedDate: Date
+  contextString: string
 }
 
-export interface ParsedDatesObject {
+interface ParsedDatesObject {
   fileName: string
   dates: DateObject[]
+}
+
+interface CalendarObject {
+  key: string
+  content: string
+  dates: Date
+  customData: {
+    date: DateObject
+    file: File
+  }
+  popover: boolean
+  order: number
 }
 
 const cleanDateString = (dateString: string): string => {
@@ -41,10 +54,12 @@ const parseDatesFromString = (rawText: string): DateObject[] => {
       matches.forEach((match: string) => {
         const parsedDate = anyDateParser.attempt(cleanDateString(match))
         const newDateObject = new Date(parsedDate.year, parsedDate.month, parsedDate.day)
-
+        const index = rawText.indexOf(match)
+        const contextString = rawText.substring(index - 20, index + match.length + 20)
         parsedDates.push({
           originalString: match,
-          parsedDate: newDateObject
+          parsedDate: newDateObject,
+          contextString: contextString
         })
       })
     }
@@ -57,7 +72,6 @@ export const useFileParserStore = defineStore('fileParser', () => {
   const files: Ref<File[]> = ref([])
   const rawTextFiles: Ref<RawTextObject[]> = ref([])
   const parsedDates: Ref<ParsedDatesObject[]> = ref([])
-  const calendarFormattedData: Ref<any> = ref([])
 
   const addFile = (file: File) => {
     // Add file to files array for reference
@@ -89,46 +103,32 @@ export const useFileParserStore = defineStore('fileParser', () => {
     reader.readAsArrayBuffer(file)
   }
 
-  const parseDates = () => {
-    rawTextFiles.value.forEach((rawTextFile: RawTextObject) => {
-      parsedDates.value = [
-        ...parsedDates.value,
-        {
-          fileName: rawTextFile.file.name,
-          dates: parseDatesFromString(rawTextFile.rawText)
-        }
-      ]
-    })
-  }
-
-  const getCalendarData = () => {
-    parsedDates.value.forEach((parsedDatesObject: ParsedDatesObject) => {
-      parsedDatesObject.dates.forEach((dateObject: DateObject) => {
-        calendarFormattedData.value = [
-          ...calendarFormattedData.value,
-          {
-            key: 'key',
-            content: 'red', // Boolean, String, Object
-            bar: true, // Boolean, String, Object
-            dates: dateObject.parsedDate,
-            customData: {
-              title: dateObject.originalString,
-              description: 'This is a description'
-            },
-            popover: true
-          }
-        ]
+  const getDates = () => {
+    const dates: CalendarObject[] = []
+    rawTextFiles.value.forEach((file) => {
+      file.dates.forEach((date) => {
+        dates.push({
+          key: date.originalString,
+          content: 'red',
+          dates: date.parsedDate,
+          customData: {
+            date: date,
+            file: file.file
+          },
+          popover: true,
+          order: 0
+        })
       })
     })
+
+    return dates.sort((a, b) => b.dates.getTime() - a.dates.getTime())
   }
 
   return {
     files,
     rawTextFiles,
     addFile,
-    parseDates,
     parsedDates,
-    calendarFormattedData,
-    getCalendarData
+    getDates
   }
 })
