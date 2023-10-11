@@ -4,7 +4,7 @@ import { useFileParserStore } from '@/stores/fileParser'
 const fileParser = useFileParserStore()
 import BubbleWrapper from '@/components/BubbleWrapper.vue'
 import FileUploader from '@/components/FileUploader.vue'
-import CalendarComp from '@/components/CalendarComp.vue'
+import CalendarComp from '@/components/CalendarComponent.vue'
 import FileList from '@/components/FileList.vue'
 import AppHeader from '@/components/AppHeader.vue'
 

@@ -7,11 +7,11 @@ import DownloadFileLink from '@/components/DownloadFileLink.vue'
 </script>
 
 <template>
-  <Calendar :attributes="fileParser.getDates()" expanded>
+  <!-- @vue-ignore -->
+  <Calendar :attributes="fileParser.getDates()" expanded :rows="2">
     <template #day-popover="{ attributes }">
       <div class="wrapper">
         <div v-for="{ key, customData } in attributes" :key="key">
-          {{ console.log(customData) }}
           <div class="header">
             <h2>
               {{ customData.file.name }}
