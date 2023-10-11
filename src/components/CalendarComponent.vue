@@ -1,14 +1,14 @@
 <script setup>
 import { Calendar } from 'v-calendar'
-import { useCalendarStore } from '@/stores/calendar'
-const calendarStore = useCalendarStore()
+import { useFileParserStore } from '@/stores/fileParser'
+const fileParser = useFileParserStore()
 import 'v-calendar/style.css'
 import DownloadFileLink from '@/components/DownloadFileLink.vue'
 </script>
 
 <template>
   <!-- @vue-ignore -->
-  <Calendar :attributes="calendarStore.getDates()" expanded>
+  <Calendar :attributes="fileParser.getDates()" expanded>
     <template #day-popover="{ attributes }">
       <div class="wrapper">
         <div v-for="{ key, customData } in attributes" :key="key">

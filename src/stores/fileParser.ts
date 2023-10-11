@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import mammoth from 'mammoth'
 import anyDateParser from 'any-date-parser'
 
+// Type definitions
 export interface ProcessedFile {
   file: File
   rawText: string
@@ -14,11 +15,6 @@ export interface DateObject {
   originalString: string
   parsedDate: Date
   contextString: string
-}
-
-export interface ParsedDatesObject {
-  fileName: string
-  dates: DateObject[]
 }
 
 export interface CalendarObject {
@@ -39,13 +35,15 @@ export interface CalendarObject {
   order: number
 }
 
+// Helper functions
 const cleanDateString = (dateString: string): string => {
   return dateString.replaceAll('/', ' ').replaceAll('of ', '').replaceAll(' ', '-')
 }
 
 const parseDatesFromString = (rawText: string): DateObject[] => {
-  const parsedDates: DateObject[] = []
+  const parsedDateObjects: DateObject[] = []
 
+  // Regex expressions to match dates in various formats
   const regexExpressionArray: string[] = [
     '[0-9]{1,2}(\\/|-|.|\\s){1}[0-9]{1,2}(\\/|-|.|\\s){1}[0-9]{4}', // 01/01/2021 or 01-01-2021 or 01.01.2021 or 01 01 2021
     '\\d{4}(\\/|-|.|\\s)\\d{1,2}(\\/|-|.|\\s)\\d{1,2}', // 2021/01/01 or 2021-01-01 or 2021.01.01 or 2021 01 01
@@ -53,6 +51,7 @@ const parseDatesFromString = (rawText: string): DateObject[] => {
     '\\d{1,2}(st|nd|rd|th)*(\\/|-|.|\\s)(of)*(\\s)*(January|February|March|April|May|June|July|August|September|October|November|December)(\\/|-|.|\\s)\\d{4}' // 01 of January 2021 or 01-of-January-2021 or 01 of January 2021 or 1st of January 2021
   ]
 
+  // Loop through regex expressions and match them against the raw text
   regexExpressionArray.forEach((regexExpression: string) => {
     const regex = new RegExp(regexExpression, 'gi')
     const matches = rawText.match(regex)
@@ -61,8 +60,8 @@ const parseDatesFromString = (rawText: string): DateObject[] => {
         const parsedDate = anyDateParser.attempt(cleanDateString(match))
         const newDateObject = new Date(parsedDate.year, parsedDate.month, parsedDate.day)
         const index = rawText.indexOf(match)
-        const contextString = rawText.substring(index - 40, index + match.length + 40)
-        parsedDates.push({
+        const contextString = rawText.substring(index - 60, index + match.length + 60)
+        parsedDateObjects.push({
           originalString: match,
           parsedDate: newDateObject,
           contextString: contextString
@@ -71,18 +70,15 @@ const parseDatesFromString = (rawText: string): DateObject[] => {
     }
   })
 
-  return parsedDates
+  // Return array of parsed dates
+  return parsedDateObjects
 }
 
+// Store
 export const useFileParserStore = defineStore('fileParser', () => {
-  const files: Ref<File[]> = ref([])
   const processedFileObjects: Ref<ProcessedFile[]> = ref([])
-  const parsedDates: Ref<ParsedDatesObject[]> = ref([])
 
   const addFile = (file: File) => {
-    // Add file to files array for reference
-    files.value = [...files.value, file]
-
     const reader: FileReader = new FileReader()
 
     // Use reader to convert file to arrayBuffer to then be translated into text using Mammoth
@@ -94,8 +90,9 @@ export const useFileParserStore = defineStore('fileParser', () => {
 
       const arrayBuffer = reader.result as ArrayBuffer
 
+      // Use Mammoth to extract raw text from docx file
       mammoth.extractRawText({ arrayBuffer: arrayBuffer }).then(function (resultObject) {
-        // Add extracted string to processedFileObjects array
+        // Add file to processedFileObjects array as well as the parsed dates using the helper function
         processedFileObjects.value = [
           ...processedFileObjects.value,
           {
@@ -109,10 +106,38 @@ export const useFileParserStore = defineStore('fileParser', () => {
     reader.readAsArrayBuffer(file)
   }
 
+  // Get all dates from all files and return them as an array of CalendarObjects for use in the calendar
+  const getDates = () => {
+    const dates: CalendarObject[] = []
+    processedFileObjects.value.forEach((file) => {
+      file.dates.forEach((date) => {
+        dates.push({
+          key: date.originalString,
+          content: 'teal',
+          dates: date.parsedDate,
+          customData: {
+            date: date,
+            file: file.file
+          },
+          popover: {
+            visibility: 'hover'
+          },
+          highlight: {
+            color: 'teal',
+            fillMode: 'outline'
+          },
+          order: 0
+        })
+      })
+    })
+
+    // Sort dates by highest to lowest
+    return dates.sort((a, b) => b.dates.getTime() - a.dates.getTime())
+  }
+
   return {
-    files,
     processedFileObjects,
     addFile,
-    parsedDates
+    getDates
   }
 })
