@@ -1,4 +1,4 @@
-# Save the Date project for Harbour
+# Save the Date project meant to extract dates from a DOCX file
 
 ## Description
 This app is meant to allow you to upload a DOCX file and extract the dates from it. It will then allow you to display them in a calendar. At least if everything works as planned...
